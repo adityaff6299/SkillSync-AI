@@ -1,0 +1,8 @@
+<div style="margin: 50px;">
+    <h2>Upload your Resume for AI Analysis</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Upload & Analyze</button>
+    </form>
+</div>

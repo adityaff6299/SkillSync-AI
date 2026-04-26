@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillSync AI | Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-glass: rgba(255, 255, 255, 0.9);
+            --gov-gold: #FFD700;
+            --tech-blue: #0D6EFD;
+            --bg-light: #F8F9FA;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #212529;
+        }
+
+        /* Glassmorphism Profile Header */
+        .profile-header {
+            background: var(--primary-glass);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 1.5rem 0;
+        }
+
+        .skill-badge {
+            background: #E9ECEF;
+            color: #495057;
+            font-weight: 600;
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 50px;
+            margin-right: 0.5rem;
+            display: inline-block;
+            margin-bottom: 0.3rem;
+        }
+
+        /* Job Card Styling */
+        .job-card {
+            background: white;
+            border: none;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+        }
+
+        /* Highlight Styling */
+        .gov-card {
+            border-left: 5px solid var(--gov-gold);
+            background: linear-gradient(to right, #FFFAF0, #FFFFFF);
+        }
+
+        .premium-card {
+            border-left: 5px solid var(--tech-blue);
+        }
+
+        /* Match Score Progress Bar */
+        .progress {
+            height: 8px;
+            border-radius: 10px;
+            background-color: #E9ECEF;
+        }
+
+        .progress-bar {
+            border-radius: 10px;
+            background: linear-gradient(90deg, #0d6efd, #6610f2);
+        }
+
+        .btn-apply {
+            border-radius: 12px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+        }
+
+        .empty-state {
+            padding: 5rem 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="profile-header mb-5 shadow-sm">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4 class="fw-bold mb-1">Top {{ user_choice }} Matches for You 🚀</h4>
+                <div class="d-flex align-items-center flex-wrap mt-2">
+                    <span class="text-muted small me-3"><strong>Branch:</strong> {{ branch }}</span>
+                    <span class="text-muted small me-3"><strong>Location:</strong> {{ location }}</span>
+                    <div class="ms-md-2 mt-2 mt-md-0">
+                        {% for skill in skills %}
+                            <span class="skill-badge">#{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <a href="{% url 'home' %}" class="btn btn-outline-dark btn-sm rounded-pill px-4">🔄 Start New Search</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row g-4">
+        {% if skills %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="p-4 bg-white rounded-4 shadow-sm border" style="border-left: 5px solid #0D6EFD;">
+                <h6 class="fw-bold mb-3 text-dark">
+                    <i class="fa-solid fa-rocket text-primary me-2"></i>
+                    Auto-Search (<span class="text-primary">{{ skills.0 }}</span>) on Premium Portals:
+                </h6>
+                <div class="d-flex flex-wrap gap-2">
+                    
+                    <a href="https://internshala.com/internships/keywords-{{ skills.0|urlencode }}" target="_blank" class="btn btn-outline-info rounded-pill fw-bold shadow-sm px-4">
+                        Internshala
+                    </a>
+
+                    <a href="https://www.linkedin.com/jobs/search/?keywords={{ skills.0|urlencode }}%20Internship" target="_blank" class="btn btn-outline-primary rounded-pill fw-bold shadow-sm px-4">
+                        LinkedIn
+                    </a>
+
+                    <a href="https://unstop.com/internships?search={{ skills.0|urlencode }}" target="_blank" class="btn btn-outline-dark rounded-pill fw-bold shadow-sm px-4">
+                        Unstop
+                    </a>
+
+                    <a href="https://in.prosple.com/search-jobs?keywords={{ skills.0|urlencode }}&opportunities=Internships" target="_blank" class="btn btn-outline-success rounded-pill fw-bold shadow-sm px-4">
+                        Prosple India
+                    </a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    ```
+        {% for job in jobs %}
+        <div class="col-12">
+            <div class="card job-card p-4 {% if job.is_gov %}gov-card{% elif job.score > 90 %}premium-card{% endif %} shadow-sm">
+                <div class="row align-items-center">
+                    
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center mb-2">
+                            {% if job.is_gov %}
+                                <span class="badge bg-warning text-dark me-2">📢 RECENT NOTIFICATION / PORTAL</span>
+                            {% elif job.score > 90 %}
+                                <span class="badge bg-primary me-2">⭐ PREMIUM PARTNER</span>
+                            {% endif %}
+                            <span class="text-muted small fw-bold text-uppercase">{{ job.company }}</span>
+                        </div>
+                        
+                        <h5 class="fw-bold mb-2">{{ job.title|safe }}</h5>
+                        <p class="text-secondary small mb-3">📍 {{ job.location }} | 🕒 Available Now</p>
+                        
+                        <p class="small text-muted mb-0 d-none d-md-block">
+                            {{ job.description|safe|truncatechars:180 }}
+                        </p>
+                    </div>
+
+                    <div class="col-md-4 text-md-end mt-4 mt-md-0 border-start ps-md-4">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="small fw-bold">Skill Match</span>
+                                <span class="small fw-bold text-primary">{{ job.score }}%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: {{ job.score }}%" 
+                                     aria-valuenow="{{ job.score }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <a href="{{ job.apply_url }}" target="_blank" 
+                               class="btn {% if job.is_gov %}btn-danger{% else %}btn-primary{% endif %} btn-apply shadow-sm">
+                                {% if job.is_gov %}View Official Notice{% else %}Apply Directly{% endif %}
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        
+        <div class="col-12 empty-state">
+            <div class="display-1 mb-4">🔍</div>
+            <h3 class="fw-bold">No Exact Matches Found</h3>
+            <p class="text-muted mb-4">We couldn't find active opportunities matching all your strict filters right now.<br>Try modifying your domain or location to see more options.</p>
+            <a href="{% url 'home' %}" class="btn btn-primary px-5 rounded-pill fw-bold">Try Different Filters</a>
+        </div>
+        
+        {% endfor %}
+        
+    </div>
+
+    <div class="mt-5 pt-4 text-center border-top">
+        <p class="small text-muted">Aggregating opportunities from verified private job boards and official Government Portals (ISRO/DRDO/AICTE).</p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

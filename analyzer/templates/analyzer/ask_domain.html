@@ -1,0 +1,20 @@
+<div class="container mt-5 text-center" style="max-width: 500px;">
+    <div class="card p-5 shadow border-0" style="border-radius: 20px;">
+        <h3 class="fw-bold">No Skills Detected 🔍</h3>
+        <p class="text-muted">We couldn't read the skills on your resume clearly. What domain are you looking for?</p>
+        
+        <form method="POST" action="{% url 'analyze' %}">
+            {% csrf_token %}
+            <input type="hidden" name="user_choice" value="{{ request.POST.user_choice }}">
+            <input type="hidden" name="state" value="{{ request.POST.state }}">
+            <input type="hidden" name="location" value="{{ request.POST.location }}">
+            <input type="hidden" name="want_stipend" value="{{ request.POST.want_stipend }}">
+            
+            <input type="text" name="fallback_domain" class="form-control mb-3" 
+                   placeholder="e.g. Web Development, Data Science" required>
+            
+            <button type="submit" class="btn btn-primary w-100 fw-bold">SEARCH NOW</button>
+            <a href="{% url 'home' %}" class="btn btn-link mt-2 text-decoration-none">Go Back</a>
+        </form>
+    </div>
+</div>

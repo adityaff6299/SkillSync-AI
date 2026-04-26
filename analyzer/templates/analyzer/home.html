@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillSync AI | Advanced Career Matching</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); }
+        
+        body { 
+            background: #f1f5f9; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            color: #1e293b; 
+        }
+        
+        .main-container { max-width: 800px; margin: 40px auto; padding: 20px; }
+        
+        .card { 
+            border: none; 
+            border-radius: 20px; 
+            background: #ffffff; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); 
+            display: none; 
+            animation: fadeIn 0.5s ease-out; 
+        }
+        
+        #page-1 { display: block; }
+        
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: scale(0.98); } 
+            to { opacity: 1; transform: scale(1); } 
+        }
+        
+        .btn-choice { 
+            border: 2px solid #f1f5f9; 
+            border-radius: 24px; 
+            background: #ffffff; 
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        
+        .btn-choice:hover { 
+            border-color: #6366f1; 
+            transform: translateY(-8px); 
+            box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.1); 
+        }
+        
+        .form-label { font-weight: 700; font-size: 0.95rem; color: #334155; margin-bottom: 10px; }
+        
+        .form-control, .form-select { 
+            border-radius: 14px; 
+            padding: 14px; 
+            border: 2px solid #e2e8f0; 
+            transition: 0.2s; 
+        }
+        
+        .form-control:focus, .form-select:focus { 
+            border-color: #6366f1; 
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); 
+        }
+        
+        .domain-badge { 
+            cursor: pointer; 
+            border: 2px solid #f1f5f9; 
+            border-radius: 16px; 
+            padding: 12px; 
+            display: block; 
+            text-align: center; 
+            font-size: 0.9rem; 
+            font-weight: 600; 
+            background: #f8fafc; 
+            transition: 0.2s; 
+        }
+        
+        .btn-check:checked + .domain-badge { 
+            background: #6366f1; 
+            color: white; 
+            border-color: #6366f1; 
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); 
+        }
+        
+        .loader { 
+            width: 20px; height: 20px; 
+            border: 3px solid #e2e8f0; border-top-color: #6366f1; 
+            border-radius: 50%; display: inline-block; 
+            animation: spin 1s linear infinite; 
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .step-header { 
+            font-size: 0.75rem; 
+            letter-spacing: 2px; 
+            text-transform: uppercase; 
+            font-weight: 800; 
+            color: #6366f1; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <form id="career-form" method="POST" action="{% url 'analyze' %}" enctype="multipart/form-data" onsubmit="prepareSkills()">
+        {% csrf_token %}
+        <input type="hidden" name="user_choice" id="user_choice" value="internship">
+        <input type="hidden" name="manual_skills" id="hidden_manual_skills">
+
+        <div id="page-1" class="card p-5 text-center">
+            <h1 class="fw-bold mb-3 display-5">SkillSync AI</h1>
+            <p class="text-muted mb-5 px-4">Our matching algorithm finds the best opportunities based on your specific skills and academic profile.</p>
+            <div class="row justify-content-center g-4">
+                <div class="col-md-8">
+                    <button type="button" class="btn btn-choice w-100 py-5" onclick="goToPage2('internship')">
+                        <span class="display-3 d-block mb-3">🎓</span>
+                        <span class="h4 fw-bold">Find Internships</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-2" class="card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                <span class="step-header">Step 02 - Requirements</span>
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="backTo(1)">← Back</button>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <label class="form-label">Type of Opportunity Preference</label>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="pay_type" id="p_paid" value="paid" onchange="togglePay('paid')" required>
+                            <label class="btn btn-outline-primary w-100 py-3 fw-bold" for="p_paid">💰 PAID</label>
+                        </div>
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="pay_type" id="p_free" value="free" onchange="togglePay('free')">
+                            <label class="btn btn-outline-secondary w-100 py-3 fw-bold" for="p_free">🆓 FREE</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4 p-4 bg-light rounded-4 border">
+                <label id="stipend-label" class="form-label d-block text-center h6">Do you strictly require a Stipend?</label>
+                <div class="d-flex gap-3 justify-content-center">
+                    <div class="flex-grow-1">
+                        <input type="radio" class="btn-check" name="want_stipend" id="s_yes" value="yes">
+                        <label class="btn btn-outline-dark w-100 fw-bold" for="s_yes">Yes, Must</label>
+                    </div>
+                    <div class="flex-grow-1">
+                        <input type="radio" class="btn-check" name="want_stipend" id="s_no" value="no">
+                        <label class="btn btn-outline-dark w-100 fw-bold" for="s_no">No, Any</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-top pt-4">
+                <h6 class="fw-bold text-uppercase small text-muted mb-3">📍 Preferred Location</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">State / UT</label>
+                        <select id="state-select" name="state" class="form-select" onchange="fetchDistricts(this.value)">
+                            <option value="">Select State</option>
+                            <option value="Remote">Remote (Work From Home)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6" id="district-div" style="display:none;">
+                        <label class="form-label">District <span id="dist-load" class="loader" style="display:none;"></span></label>
+                        <select id="district-select" name="location" class="form-select">
+                            <option value="">Select District</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-5">
+                <button type="button" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow" onclick="goToPage3()">Continue to Academic Profile</button>
+            </div>
+        </div>
+
+        <div id="page-3" class="card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                <span class="step-header">Step 03 - Final Profile</span>
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="backTo(2)">← Back</button>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label">Qualification</label>
+                    <select name="course" class="form-select" onchange="loadBranches(this.value)">
+                        <option value="">Select Qualification</option>
+                        <option value="B.Tech">B.Tech / B.E.</option>
+                        <option value="M.Tech">M.Tech / M.E.</option>
+                        <option value="BCA">BCA</option>
+                        <option value="MCA">MCA</option>
+                        <option value="B.Sc">B.Sc</option>
+                        <option value="M.Sc">M.Sc</option>
+                        <option value="MBA">MBA</option>
+                        <option value="Diploma">Diploma</option>
+                    </select>
+                </div>
+                <div id="branch-div" class="col-md-6" style="display:none;">
+                    <label class="form-label">Specialization / Branch</label>
+                    <select id="branch-select" name="branch" class="form-select"></select>
+                </div>
+            </div>
+
+            <hr class="my-4">
+
+            <label class="form-label mb-3">Select Domains You Are Interested In:</label>
+            <div class="row g-2 mb-4">
+                <div class="col-4"><input type="checkbox" name="domains" value="Web Development" id="d1" class="btn-check"><label for="d1" class="domain-badge">Web Dev</label></div>
+                <div class="col-4"><input type="checkbox" name="domains" value="Python" id="d2" class="btn-check"><label for="d2" class="domain-badge">Python</label></div>
+                <div class="col-4"><input type="checkbox" name="domains" value="Data Science" id="d3" class="btn-check"><label for="d3" class="domain-badge">Data Science</label></div>
+                <div class="col-4"><input type="checkbox" name="domains" value="Machine Learning" id="d4" class="btn-check"><label for="d4" class="domain-badge">ML / AI</label></div>
+                <div class="col-4"><input type="checkbox" name="domains" value="Full Stack" id="d5" class="btn-check"><label for="d5" class="domain-badge">Full Stack</label></div>
+                <div class="col-4"><input type="checkbox" name="domains" value="Java Developer" id="d6" class="btn-check"><label for="d6" class="domain-badge">Java</label></div>
+                <div class="col-4"><input type="checkbox" name="domains" value="Cyber Security" id="d7" class="btn-check"><label for="d7" class="domain-badge">CyberSec</label></div>
+                <div class="col-4"><input type="checkbox" name="domains" value="Graphic Design" id="d8" class="btn-check"><label for="d8" class="domain-badge">Design</label></div>
+                <div class="col-4"><input type="checkbox" name="domains" value="Digital Marketing" id="d9" class="btn-check"><label for="d9" class="domain-badge">Marketing</label></div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Custom Skills (comma separated)</label>
+                <input type="text" name="custom_domain" class="form-control" placeholder="e.g. Django, Flutter, C++, React">
+            </div>
+
+            <div class="p-4 border rounded-4 bg-light mb-4">
+                <label class="form-label mb-2 d-block">📄 AI Resume Sync (PDF Only)</label>
+                <p class="text-muted small mb-3">Our AI will scan your resume to find additional skills automatically.</p>
+                <input type="file" name="resume" class="form-control" accept=".pdf,.png,.jpg,.jpeg">
+            </div>
+
+            <button type="submit" class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-lg">RUN AI MATCHING ENGINE</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // FULL LIST OF STATES & UTs
+    const states = [
+        "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh",
+        "Dadra and Nagar Haveli", "Daman and Diu", "Delhi", "Goa", "Gujarat", "Haryana",
+        "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand", "Karnataka", "Kerala", "Ladakh",
+        "Lakshadweep", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram",
+        "Nagaland", "Odisha", "Puducherry", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu",
+        "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"
+    ];
+
+    // COMPREHENSIVE BRANCH MAPPING
+    const branchMap = {
+        "B.Tech": ["Computer Science", "Information Technology", "AI & Machine Learning", "Data Science", "Electronics & Communication", "Mechanical Engineering", "Civil Engineering", "Electrical Engineering", "Chemical Engineering", "Biotechnology"],
+        "M.Tech": ["Computer Science", "VLSI Design", "Structural Engineering", "Thermal Engineering", "Power Systems", "Software Engineering"],
+        "BCA": ["General BCA", "Cloud Computing", "Cyber Security", "Mobile Applications"],
+        "MCA": ["Software Engineering", "Application Development", "Networking", "Data Analytics"],
+        "B.Sc": ["Computer Science", "Information Technology", "Mathematics", "Physics", "Chemistry", "Biology"],
+        "M.Sc": ["Data Science", "Computer Science", "Mathematics", "Physics", "Cyber Security"],
+        "MBA": ["IT & Systems", "Finance", "Marketing", "Human Resources", "Operations", "Business Analytics"],
+        "Diploma": ["Computer Engineering", "Mechanical", "Electrical", "Civil"]
+    };
+
+    // INIT STATES
+    const sSelect = document.getElementById('state-select');
+    states.forEach(s => {
+        let opt = document.createElement('option');
+        opt.value = s; opt.innerHTML = s;
+        sSelect.appendChild(opt);
+    });
+
+    // NAVIGATION
+    function goToPage2(goal) {
+        document.getElementById('user_choice').value = goal;
+        document.getElementById('page-1').style.display = 'none';
+        document.getElementById('page-2').style.display = 'block';
+    }
+
+    function togglePay(type) {
+        const lbl = document.getElementById('stipend-label');
+        if (type === 'paid') {
+            lbl.innerHTML = "💰 <strong>Paid</strong> chosen. Confirm your stipend need:";
+            document.getElementById('s_yes').checked = true;
+        } else {
+            lbl.innerHTML = "🆓 <strong>Free</strong> chosen. Any stipend is a bonus:";
+            document.getElementById('s_no').checked = true;
+        }
+    }
+
+    function goToPage3() {
+        document.getElementById('page-2').style.display = 'none';
+        document.getElementById('page-3').style.display = 'block';
+    }
+
+    function backTo(p) {
+        document.querySelectorAll('.card').forEach(c => c.style.display = 'none');
+        document.getElementById('page-' + p).style.display = 'block';
+    }
+
+    // ACADEMIC LOADER
+    function loadBranches(course) {
+        const d = document.getElementById('branch-div');
+        const s = document.getElementById('branch-select');
+        s.innerHTML = '<option value="">Select Specialization</option>';
+        if (course && branchMap[course]) {
+            d.style.display = 'block';
+            branchMap[course].forEach(b => {
+                let opt = document.createElement('option');
+                opt.value = b; opt.innerHTML = b;
+                s.appendChild(opt);
+            });
+        } else {
+            d.style.display = 'none';
+        }
+    }
+
+    // DISTRICT API LOADER
+    async function fetchDistricts(state) {
+        const dDiv = document.getElementById('district-div');
+        const dSelect = document.getElementById('district-select');
+        const loader = document.getElementById('dist-load');
+        
+        if (state === "" || state === "Remote") {
+            dDiv.style.display = 'none';
+            return;
+        }
+        
+        dDiv.style.display = 'block';
+        loader.style.display = 'inline-block';
+        dSelect.innerHTML = '<option value="">Loading...</option>';
+        
+        try {
+            // Fetch real districts from JSON API
+            const response = await fetch('https://raw.githubusercontent.com/sab99r/Indian-States-And-Districts/master/states-and-districts.json');
+            const data = await response.json();
+            
+            // Match the state name (ignoring case just to be safe)
+            const stateData = data.states.find(s => s.state.toLowerCase() === state.toLowerCase());
+            
+            dSelect.innerHTML = '<option value="">Select District</option>';
+            if (stateData && stateData.districts) {
+                stateData.districts.forEach(d => {
+                    let opt = document.createElement('option');
+                    opt.value = d; opt.innerHTML = d;
+                    dSelect.appendChild(opt);
+                });
+            } else {
+                throw new Error("No districts found for state");
+            }
+        } catch (error) {
+            // Safety Fallback: Just in case the API goes down, show generic options
+            dSelect.innerHTML = '<option value="">Select District</option>';
+            const dummyDistricts = ["Capital City", "North District", "South District", "East District", "West District", "Central District", "Other"];
+            dummyDistricts.forEach(d => {
+                let opt = document.createElement('option');
+                opt.value = d; opt.innerHTML = d;
+                dSelect.appendChild(opt);
+            });
+        } finally {
+            loader.style.display = 'none';
+        }
+    }
+
+    // THE BRIDGE: Collects skills and prepares them for Django
+    function prepareSkills() {
+        let selectedSkills = [];
+        
+        // 1. Grab all the checked domain boxes
+        let checkboxes = document.querySelectorAll('input[name="domains"]:checked');
+        checkboxes.forEach(function(cb) {
+            selectedSkills.push(cb.value);
+        });
+
+        // 2. Grab anything typed in the custom skills box
+        let customSkill = document.querySelector('input[name="custom_domain"]').value.trim();
+        if (customSkill !== "") {
+            // Split by comma in case they typed multiple
+            let splitSkills = customSkill.split(',');
+            splitSkills.forEach(function(sk) {
+                if(sk.trim() !== "") {
+                    selectedSkills.push(sk.trim());
+                }
+            });
+        }
+
+        // 3. Put it in the hidden input for Django to read
+        document.getElementById('hidden_manual_skills').value = selectedSkills.join(', ');
+    }
+</script>
+</body>
+</html>
