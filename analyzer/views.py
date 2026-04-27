@@ -9,7 +9,7 @@ def home(request):
 
 def analyze(request):
     if request.method == 'POST':
-        # --- WIRETAP: SEE WHAT THE HTML IS ACTUALLY SENDING ---
+        
         print("\n" + "="*40)
         print("🚨 DEBUG: INCOMING DATA FROM BROWSER 🚨")
         print(f"User Choice: {request.POST.get('user_choice')}")
